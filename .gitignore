@@ -1,0 +1,53 @@
+# ── Variáveis de ambiente (NUNCA commitar) ──
+.env
+.env.local
+.env.*.local
+
+# ── Node / NestJS ───────────────────────────
+node_modules/
+dist/
+build/
+*.js.map
+
+# ── Angular ─────────────────────────────────
+frontend/dist/
+frontend/.angular/
+frontend/node_modules/
+
+# ── Python / FastAPI ─────────────────────────
+ai/__pycache__/
+ai/**/__pycache__/
+ai/**/*.pyc
+ai/.venv/
+ai/venv/
+ai/.pytest_cache/
+
+# ── Prisma ───────────────────────────────────
+backend/prisma/migrations/**/migration_lock.toml
+
+# ── TypeScript ───────────────────────────────
+*.tsbuildinfo
+
+# ── Testes / Cobertura ────────────────────────
+coverage/
+
+# ── Logs ─────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Claude Code ──────────────────────────────
+.claude/
+
+# ── Editores / IDEs ───────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Docker ────────────────────────────────────
+# (docker-compose.yml é versionado, volumes não)

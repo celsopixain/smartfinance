@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String          @id @default(uuid())
+  name         String
+  email        String          @unique
+  passwordHash String          @map("password_hash")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+  accounts     Account[]
+  aiLogs       AiSpendingLog[]
+  budgets      Budget[]
+  categories   Category[]
+  transactions Transaction[]
+
+  @@map("users")
+}
+
+model Account {
+  id           String        @id @default(uuid())
+  userId       String        @map("user_id")
+  name         String
+  type         AccountType
+  balance      Decimal       @default(0) @db.Decimal(15, 2)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Category {
+  id           String          @id @default(uuid())
+  userId       String          @map("user_id")
+  name         String
+  icon         String?
+  color        String?
+  parentId     String?         @map("parent_id")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  aiLogs       AiSpendingLog[]
+  budgets      Budget[]
+  parent       Category?       @relation("Subcategories", fields: [parentId], references: [id])
+  children     Category[]      @relation("Subcategories")
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([userId])
+  @@index([parentId])
+  @@map("categories")
+}
+
+model Transaction {
+  id          String          @id @default(uuid())
+  userId      String          @map("user_id")
+  accountId   String          @map("account_id")
+  categoryId  String          @map("category_id")
+  type        TransactionType
+  amount      Decimal         @db.Decimal(15, 2)
+  description String
+  date        DateTime
+  isAnomaly   Boolean         @default(false) @map("is_anomaly")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  account     Account         @relation(fields: [accountId], references: [id])
+  category    Category        @relation(fields: [categoryId], references: [id])
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([categoryId])
+  @@index([date])
+  @@index([userId, date])
+  @@map("transactions")
+}
+
+model Budget {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  categoryId String   @map("category_id")
+  amount     Decimal  @db.Decimal(15, 2)
+  month      Int
+  year       Int
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  category   Category @relation(fields: [categoryId], references: [id])
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryId, month, year])
+  @@index([userId, year, month])
+  @@map("budgets")
+}
+
+model AiSpendingLog {
+  id               String   @id @default(uuid())
+  userId           String   @map("user_id")
+  categoryId       String   @map("category_id")
+  month            Int
+  year             Int
+  totalAmount      Decimal  @map("total_amount") @db.Decimal(15, 2)
+  transactionCount Int      @map("transaction_count")
+  avgAmount        Decimal  @map("avg_amount") @db.Decimal(15, 2)
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  category         Category @relation(fields: [categoryId], references: [id])
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryId, month, year])
+  @@index([userId, year, month])
+  @@map("ai_spending_logs")
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  CASH
+  CREDIT
+  INVESTMENT
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}

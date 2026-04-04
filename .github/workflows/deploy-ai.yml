@@ -1,0 +1,42 @@
+name: Deploy AI Service
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ai/**'
+      - '.github/workflows/deploy-ai.yml'
+
+jobs:
+  test-and-deploy:
+    name: Test + Deploy FastAPI → Render
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ai
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: ai/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest tests/ -v --tb=short
+
+      - name: Trigger Render deploy
+        run: |
+          curl --silent --show-error --fail \
+            -X POST "${{ secrets.RENDER_DEPLOY_HOOK_AI }}"
+        # Secret configurada em: GitHub → Settings → Secrets → Actions
+        # Nome: RENDER_DEPLOY_HOOK_AI
+        # Valor: URL do deploy hook gerada no painel do Render
