@@ -9,6 +9,7 @@ import { TransactionsModule } from './transactions/transactions.module'
 import { AiModule } from './ai/ai.module'
 import { AccountsModule } from './accounts/accounts.module'
 import { CategoriesModule } from './categories/categories.module'
+import { HealthController } from './health.controller'
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { CategoriesModule } from './categories/categories.module'
     AccountsModule,
     CategoriesModule,
   ],
+  controllers: [HealthController],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     {
