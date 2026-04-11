@@ -168,6 +168,8 @@ pytest tests/ -v
 
 ## Deploy
 
+**Frontend em produção:** [https://smartfinance-iota.vercel.app](https://smartfinance-iota.vercel.app)
+
 Consulte o [DEPLOY.md](DEPLOY.md) para o guia completo passo a passo (Neon.tech → Upstash → Render → Vercel).
 
 ---
