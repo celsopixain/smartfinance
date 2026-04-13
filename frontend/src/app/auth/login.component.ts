@@ -20,7 +20,7 @@ import { AuthService } from '../core/services/auth.service'
         <!-- Logo -->
         <div class="text-center space-y-2">
           <div class="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center mx-auto">
-            <span class="text-white font-bold text-lg">SF</span>
+            <span class="text-white font-bold text-lg"><img src="favicon.svg" alt="SmartFinance" class="w-full h-full object-contain" /></span>
           </div>
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white">SmartFinance</h1>
           <p class="text-sm text-gray-500 dark:text-gray-400">Entre na sua conta</p>
