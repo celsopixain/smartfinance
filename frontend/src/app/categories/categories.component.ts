@@ -35,6 +35,18 @@ import type { CategoryFull } from '../core/schemas/api.schemas'
                class="px-3 py-1.5 rounded-lg text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20">
               Categorias
             </a>
+            <a routerLink="/budgets"
+               class="px-3 py-1.5 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+              Orçamentos
+            </a>
+            <a routerLink="/analytics"
+               class="px-3 py-1.5 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+              Analytics
+            </a>
+            <a routerLink="/recurring"
+               class="px-3 py-1.5 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+              Recorrentes
+            </a>
           </nav>
         </div>
         <button (click)="logout()"

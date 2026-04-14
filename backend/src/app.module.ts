@@ -9,6 +9,9 @@ import { TransactionsModule } from './transactions/transactions.module'
 import { AiModule } from './ai/ai.module'
 import { AccountsModule } from './accounts/accounts.module'
 import { CategoriesModule } from './categories/categories.module'
+import { BudgetsModule } from './budgets/budgets.module'
+import { AnalyticsModule } from './analytics/analytics.module'
+import { RecurringTransactionsModule } from './recurring-transactions/recurring-transactions.module'
 import { HealthController } from './health.controller'
 
 @Module({
@@ -21,6 +24,9 @@ import { HealthController } from './health.controller'
     AiModule,
     AccountsModule,
     CategoriesModule,
+    BudgetsModule,
+    AnalyticsModule,
+    RecurringTransactionsModule,
   ],
   controllers: [HealthController],
   providers: [

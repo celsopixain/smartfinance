@@ -36,6 +36,24 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'budgets',
+    loadComponent: () =>
+      import('./budgets/budgets.component').then(m => m.BudgetsComponent),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'analytics',
+    loadComponent: () =>
+      import('./analytics/analytics.component').then(m => m.AnalyticsComponent),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'recurring',
+    loadComponent: () =>
+      import('./recurring/recurring.component').then(m => m.RecurringComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: '**',
     redirectTo: 'dashboard',
   },

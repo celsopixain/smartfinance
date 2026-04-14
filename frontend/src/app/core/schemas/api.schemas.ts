@@ -68,3 +68,56 @@ export const PaginatedTransactionsSchema = z.object({
   }),
 })
 export type PaginatedTransactions = z.infer<typeof PaginatedTransactionsSchema>
+
+// ── Orçamentos ────────────────────────────────────────────
+const BudgetCategorySchema = z.object({
+  id:    z.string(),
+  name:  z.string(),
+  color: z.string().nullable(),
+  icon:  z.string().nullable(),
+})
+
+export const BudgetSchema = z.object({
+  id:         z.string().uuid(),
+  categoryId: z.string(),
+  category:   BudgetCategorySchema,
+  amount:     z.union([z.number(), z.string()]).transform(v => Number(v)),
+  month:      z.number(),
+  year:       z.number(),
+  spent:      z.union([z.number(), z.string()]).transform(v => Number(v)),
+  remaining:  z.union([z.number(), z.string()]).transform(v => Number(v)),
+  percentage: z.number(),
+})
+export type Budget = z.infer<typeof BudgetSchema>
+
+// ── Analytics ────────────────────────────────────────────
+export const MonthlyDataSchema = z.object({
+  month:   z.number(),
+  income:  z.union([z.number(), z.string()]).transform(v => Number(v)),
+  expense: z.union([z.number(), z.string()]).transform(v => Number(v)),
+  balance: z.union([z.number(), z.string()]).transform(v => Number(v)),
+})
+export type MonthlyData = z.infer<typeof MonthlyDataSchema>
+
+export const CategoryBreakdownSchema = z.object({
+  categoryId: z.string(),
+  category:   BudgetCategorySchema.nullable(),
+  total:      z.union([z.number(), z.string()]).transform(v => Number(v)),
+  count:      z.number(),
+  percentage: z.number(),
+})
+export type CategoryBreakdown = z.infer<typeof CategoryBreakdownSchema>
+
+// ── Transações Recorrentes ────────────────────────────────
+export const RecurringTransactionSchema = z.object({
+  id:          z.string().uuid(),
+  type:        z.enum(['INCOME', 'EXPENSE']),
+  amount:      z.union([z.number(), z.string()]).transform(v => Number(v)),
+  description: z.string(),
+  dayOfMonth:  z.number(),
+  isActive:    z.boolean(),
+  category:    z.object({ id: z.string(), name: z.string(), color: z.string().nullable(), icon: z.string().nullable() }),
+  account:     z.object({ id: z.string(), name: z.string() }),
+  createdAt:   z.string(),
+})
+export type RecurringTransaction = z.infer<typeof RecurringTransactionSchema>
