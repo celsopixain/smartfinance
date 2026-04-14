@@ -119,7 +119,7 @@ const BAR_COLORS   = [
 
           @if (analyticsService.isLoading()) {
             <div class="space-y-2">
-              @for (_ of [1,2,3]; track $_) {
+              @for (n of [1,2,3]; track $index) {
                 <div class="h-10 bg-gray-100 dark:bg-gray-800 rounded animate-pulse"></div>
               }
             </div>
