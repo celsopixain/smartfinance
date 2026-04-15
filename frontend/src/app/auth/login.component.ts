@@ -3,10 +3,15 @@ import {
   ChangeDetectionStrategy,
   signal,
   inject,
+  OnInit,
+  OnDestroy,
 } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
+import { HttpErrorResponse } from '@angular/common/http'
 import { AuthService } from '../core/services/auth.service'
+
+type BackendStatus = 'checking' | 'waking' | 'online' | 'timeout'
 
 @Component({
   selector: 'app-login',
@@ -26,7 +31,36 @@ import { AuthService } from '../core/services/auth.service'
           <p class="text-sm text-gray-500 dark:text-gray-400">Entre na sua conta</p>
         </div>
 
-        <!-- Erro -->
+        <!-- Banner: verificando servidor -->
+        @if (backendStatus() === 'checking') {
+          <div class="flex items-center gap-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-sm rounded-lg px-4 py-3">
+            <svg class="w-4 h-4 animate-spin shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"/>
+            </svg>
+            Verificando servidor...
+          </div>
+        }
+
+        <!-- Banner: servidor acordando -->
+        @if (backendStatus() === 'waking') {
+          <div class="flex items-start gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 text-sm rounded-lg px-4 py-3">
+            <svg class="w-4 h-4 animate-spin shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"/>
+            </svg>
+            <span>Servidor iniciando, aguarde...<br><span class="opacity-75 text-xs">Pode levar até 30 segundos após inatividade.</span></span>
+          </div>
+        }
+
+        <!-- Banner: timeout -->
+        @if (backendStatus() === 'timeout') {
+          <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm rounded-lg px-4 py-3">
+            Servidor indisponível. Tente novamente em alguns instantes.
+          </div>
+        }
+
+        <!-- Erro de login -->
         @if (errorMsg()) {
           <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm rounded-lg px-4 py-3">
             {{ errorMsg() }}
@@ -76,9 +110,12 @@ import { AuthService } from '../core/services/auth.service'
 
           <button
             type="submit"
-            [disabled]="isLoading()"
+            [disabled]="isLoading() || backendStatus() !== 'online'"
             class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-medium py-2.5 rounded-lg transition-colors text-sm">
-            @if (isLoading()) { Entrando... } @else { Entrar }
+            @if (backendStatus() === 'checking') { Verificando... }
+            @else if (backendStatus() === 'waking') { Aguardando servidor... }
+            @else if (isLoading()) { Entrando... }
+            @else { Entrar }
           </button>
         </form>
 
@@ -91,7 +128,7 @@ import { AuthService } from '../core/services/auth.service'
     </div>
   `,
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit, OnDestroy {
   private readonly auth = inject(AuthService)
   private readonly router = inject(Router)
 
@@ -100,6 +137,50 @@ export class LoginComponent {
   readonly isLoading = signal(false)
   readonly errorMsg = signal('')
   readonly showPassword = signal(false)
+  readonly backendStatus = signal<BackendStatus>('checking')
+
+  private pollInterval: ReturnType<typeof setInterval> | null = null
+  private pollAttempts = 0
+  private readonly MAX_ATTEMPTS = 20 // 20 × 4s = 80s
+
+  ngOnInit(): void {
+    void this.startHealthCheck()
+  }
+
+  ngOnDestroy(): void {
+    this.clearPoll()
+  }
+
+  private async startHealthCheck(): Promise<void> {
+    const online = await this.auth.checkHealth()
+    if (online) {
+      this.backendStatus.set('online')
+      return
+    }
+    this.backendStatus.set('waking')
+    this.pollInterval = setInterval(() => void this.pollHealth(), 4000)
+  }
+
+  private async pollHealth(): Promise<void> {
+    this.pollAttempts++
+    if (this.pollAttempts >= this.MAX_ATTEMPTS) {
+      this.clearPoll()
+      this.backendStatus.set('timeout')
+      return
+    }
+    const online = await this.auth.checkHealth()
+    if (online) {
+      this.clearPoll()
+      this.backendStatus.set('online')
+    }
+  }
+
+  private clearPoll(): void {
+    if (this.pollInterval !== null) {
+      clearInterval(this.pollInterval)
+      this.pollInterval = null
+    }
+  }
 
   async onSubmit() {
     if (!this.email || !this.password) return
@@ -108,8 +189,14 @@ export class LoginComponent {
     try {
       await this.auth.login(this.email, this.password)
       void this.router.navigate(['/dashboard'])
-    } catch {
-      this.errorMsg.set('E-mail ou senha inválidos.')
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 0) {
+        this.errorMsg.set('Servidor offline. Aguarde o servidor iniciar e tente novamente.')
+        this.backendStatus.set('waking')
+        void this.startHealthCheck()
+      } else {
+        this.errorMsg.set('E-mail ou senha inválidos.')
+      }
     } finally {
       this.isLoading.set(false)
     }

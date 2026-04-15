@@ -35,6 +35,15 @@ export class AuthService {
     AuthUserSchema.parse(raw) // valida resposta
   }
 
+  async checkHealth(): Promise<boolean> {
+    try {
+      await firstValueFrom(this.http.get(`${environment.apiUrl}/health`))
+      return true
+    } catch {
+      return false
+    }
+  }
+
   async logout(): Promise<void> {
     try {
       await firstValueFrom(
