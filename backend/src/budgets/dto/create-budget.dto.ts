@@ -4,20 +4,20 @@ import { Type } from 'class-transformer'
 
 export class CreateBudgetDto {
   @IsUUID()
-  categoryId: string
+  categoryId!: string
 
   @IsPositive()
   @Type(() => Number)
-  amount: number
+  amount!: number
 
   @IsInt()
   @Min(1)
   @Max(12)
   @Type(() => Number)
-  month: number
+  month!: number
 
   @IsInt()
   @Min(2020)
   @Type(() => Number)
-  year: number
+  year!: number
 }

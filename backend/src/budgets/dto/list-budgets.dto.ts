@@ -6,10 +6,10 @@ export class ListBudgetsDto {
   @Min(1)
   @Max(12)
   @Type(() => Number)
-  month: number
+  month!: number
 
   @IsInt()
   @Min(2020)
   @Type(() => Number)
-  year: number
+  year!: number
 }

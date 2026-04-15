@@ -11,8 +11,8 @@ import { RecurringTransactionsService } from './recurring-transactions.service'
 import { CreateRecurringTransactionDto } from './dto/create-recurring-transaction.dto'
 
 class GenerateQueryDto {
-  @IsInt() @Min(1) @Max(12) @Type(() => Number) month: number
-  @IsInt() @Min(2020)       @Type(() => Number) year: number
+  @IsInt() @Min(1) @Max(12) @Type(() => Number) month!: number
+  @IsInt() @Min(2020)       @Type(() => Number) year!: number
 }
 
 interface AuthRequest extends ExpressRequest {

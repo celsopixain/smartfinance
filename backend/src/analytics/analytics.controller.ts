@@ -6,12 +6,12 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { AnalyticsService } from './analytics.service'
 
 class MonthlyQueryDto {
-  @IsInt() @Min(2020) @Type(() => Number) year: number
+  @IsInt() @Min(2020) @Type(() => Number) year!: number
 }
 
 class CategoryQueryDto {
-  @IsInt() @Min(1) @Max(12) @Type(() => Number) month: number
-  @IsInt() @Min(2020)       @Type(() => Number) year: number
+  @IsInt() @Min(1) @Max(12) @Type(() => Number) month!: number
+  @IsInt() @Min(2020)       @Type(() => Number) year!: number
 }
 
 interface AuthRequest extends ExpressRequest {
